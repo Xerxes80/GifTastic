@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="utf-8">
+<title>Favorite animals</title>
+<style type="text/css">
+    button{
+        background-color: seagreen;
+        border-radius: 5px;
+        margin: 10px 2px;
+        width: 70px;
+        padding: 4px;
+        color: lavender;
+        border: 2px solid seagreen;
+     }
+    img{
+        margin: 5px;
+    }
+    #label{
+        margin: 5px;
+    }
+    #add-animal{
+        margin: 5px;
+    }
+    #user-input{
+        margin: 5px;
+    }
+</style>
+</head>
+<body>
+    <div class="container">
+    <div id="buttons-view"></div>
+    <form id="animal-form">
+        <label for="label">Add an Animal</label><br>
+        <input type="text" id="user-input"><br>
+        <input id="add-animal" type="submit" value="Submit">
+    </form>
+    <div id="animal-view"></div>
+    <script src="http://code.jquery.com/jquery-2.1.3.min.js"></script>
+    <script type="text/javascript">
+        var animals = ["dog", "cat", "rabbit", "monkey", "chicken","cow", "lion"];
+        var animalDiv = $("<div class='animal-image'>");
+        function displayanimalInfo() {
+            $("#animal-view").empty();
+                var animal = $(this).attr("data-name");
+                var queryURL = "http://api.giphy.com/v1/gifs/search?q=" +
+                animal + "&api_key=dc6zaTOxFJmzC&limit=10";
+            $.ajax({
+                url: queryURL,
+                method: "GET"
+            }).done(function(response) {
+                var animalDiv = $("<div class='animal-image'>");
+                for(var i = 0 ; i<response.data.length ; i++){
+                    var result = response.data[i];
+                    var rating = response.data[i].rating;
+                    var rate = $("<p>").text("Rating: " + rating);
+                    var gif = $("<img>");
+                    gif.attr({
+                        src : response.data[i].images.fixed_height_still.url, 
+                        still : response.data[i].images.fixed_height_still.url , 
+                        animate : response.data[i].images.fixed_height.url, 
+                        state : "still",
+                        class : "gifv"
+                    });
+                    animalDiv.append(rate);
+                    animalDiv.append(gif);
+                    $("#animal-view").append(animalDiv);
+                }
+            });
+        }
+        
+        $(document).on("click", ".gifv", function() {
+            var state = $(this).attr("state");
+            var image = $(this);
+            if(state === "still"){
+            $(this).attr("src", image.attr("animate"));
+            $(this).attr("state", "animate");
+            console.log("asnfghjasfg");
+            }else if(state === "animate"){
+            $(this).attr("src", image.attr("still"));
+            $(this).attr("state", "still");
+        }
+        });
+        
+        function renderButtons() {
+            $("#buttons-view").empty();
+            for (var i = 0; i < animals.length; i++) {
+                var a = $("<button>");
+                a.addClass("animal");
+                a.attr("data-name", animals[i]);
+                a.text(animals[i]);
+                $("#buttons-view").append(a);
+            }
+        }
+
+        $("#add-animal").on("click", function(event) {
+            event.preventDefault();
+            if($("#user-input").val != null){
+                var animal = $("#user-input").val().trim();
+                animals.push(animal);
+                renderButtons();
+            }
+        });
+
+        $(document).on("click", ".animal", displayanimalInfo);
+        renderButtons();
+    </script>
+  </div>
+</body>
+
+</html>
